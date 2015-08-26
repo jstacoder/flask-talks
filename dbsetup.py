@@ -1,6 +1,5 @@
 # coding: utf-8
 import os
-import pymongo
 from mongoengine import (
         Document, EmbeddedDocument, EmbeddedDocumentField , 
         EmbeddedDocumentListField, StringField , IntField, 
@@ -8,7 +7,6 @@ from mongoengine import (
         ListField, ReferenceField, connect, pre_init, post_init
 )
 
-client = pymongo.MongoClient(MONGODB_URI)
 
 MONGODB_NAME = 'testdb'
 
