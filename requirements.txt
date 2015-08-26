@@ -1,0 +1,2 @@
+mongoengine
+pymongo==2.8
