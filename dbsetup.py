@@ -10,7 +10,7 @@ from mongoengine import (
 MONGODB_NAME = 'testdb'
 
 if os.environ.get('MONGOLAB_URI'):
-    connect(os.environ.get('MONGOHQ_URI'))
+    connect(os.environ.get('MONGOLAB_URI'))
 else:
     conn = connect(db=MONGODB_NAME)
     if MONGODB_NAME in conn.database_names():
