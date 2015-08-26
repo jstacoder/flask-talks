@@ -1,5 +1,6 @@
 # coding: utf-8
 import os
+import pymongo
 from mongoengine import (
         Document, EmbeddedDocument, EmbeddedDocumentField , 
         EmbeddedDocumentListField, StringField , IntField, 
@@ -7,10 +8,21 @@ from mongoengine import (
         ListField, ReferenceField, connect, pre_init, post_init
 )
 
+client = pymongo.MongoClient(MONGODB_URI)
+
 MONGODB_NAME = 'testdb'
 
+def _get_conn_from_uri(uri):
+    uri = uri.split('://')[-1]
+    user_data,host_data =  uri.split('@')
+    username,password = user_data.split(':')
+    host,port = host_data.split(':')
+    port,db = port.split('/')
+    port = int(port)
+    return connect(username=username,password=password,host=host,port=port,db=db)
+
 if os.environ.get('MONGOLAB_URI'):
-    connect(os.environ.get('MONGOLAB_URI'))
+    _get_conn_from_uri(os.environ.get('MONGOLAB_URI'))
 else:
     conn = connect(db=MONGODB_NAME)
     if MONGODB_NAME in conn.database_names():
@@ -81,3 +93,4 @@ topic = Topic(name='Python',sub_topics=[sub])
 talk = Talk(name='first_talk',topics=[topic])
 talk.save()
 talks = Talk.objects.all()
+
