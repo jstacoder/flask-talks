@@ -7,9 +7,6 @@ from mongoengine import (
         ListField, ReferenceField, connect, pre_init, post_init
 )
 
-
-MONGODB_NAME = 'testdb'
-
 def _get_conn_from_uri(uri):
     uri = uri.split('://')[-1]
     user_data,host_data =  uri.split('@')
@@ -17,23 +14,14 @@ def _get_conn_from_uri(uri):
     host,port = host_data.split(':')
     port,db = port.split('/')
     port = int(port)
-    return connect(username=username,password=password,host=host,port=port,db=db)
 
-if os.environ.get('MONGOLAB_URI'):
-    _get_conn_from_uri(os.environ.get('MONGOLAB_URI'))
-else:
-    conn = connect(db=MONGODB_NAME)
-    if MONGODB_NAME in conn.database_names():
-        conn.drop_database(MONGODB_NAME)
-    conn.close()
-    conn = connect(db=MONGODB_NAME)
-
+    res = dict(username=username,password=password,host=host,port=port,db=db)
+    return res
 
 def _post(*args,**kwargs):
     print args
     print 'TEARING DOWN SETUP!@@@!!'
     print kwargs
-
 
 
 class ContentType(Document):
@@ -56,10 +44,6 @@ class Topic(EmbeddedDocument):
 class Talk(Document):
     name = StringField(max_length=255,unique=True)
     topics = EmbeddedDocumentListField(Topic)
-
-
-
-#types: text,html,code,image,video,url,pdf
 
 first = True
 
@@ -84,11 +68,19 @@ def _pre(*args,**kwargs):
 post_init.connect(_post)
 pre_init.connect(_pre)
 
+def main():
+    from t3 import MONGOLAB_URI
+    conn = connect(MONGOLAB_URI)
+    data = _get_conn_from_uri(MONGOLAB_URI)
+    conn.drop_database(data['db'])
+    itm = ContentItem(name='justtst')
+    itm.content_type = ContentType.objects(name='text')[0]
+    itm.content_reference = 'refkey'
+    sub = SubTopic(name='programming',content_items=[itm])
+    topic = Topic(name='Python',sub_topics=[sub])
+    talk = Talk(name='first_talk',topics=[topic])
+    talk.save()
+    talks = Talk.objects.all()
 
-itm = ContentItem(name='justtst',content_type=ContentType.objects(name='text').first(),content_reference='refkey')
-sub = SubTopic(name='programming',content_items=[itm])
-topic = Topic(name='Python',sub_topics=[sub])
-talk = Talk(name='first_talk',topics=[topic])
-talk.save()
-talks = Talk.objects.all()
 
+main()
