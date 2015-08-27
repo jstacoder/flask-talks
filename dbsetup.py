@@ -6,6 +6,11 @@ from mongoengine import (
         BooleanField, EmailField , DateTimeField, DictField, 
         ListField, ReferenceField, connect, pre_init, post_init
 )
+from content_types import (
+            TextContent,HTMLContent,CodeContent,
+            ImageContent,VideoContent,URLContent,
+            PDFContent
+)
 
 def _get_conn_from_uri(uri):
     uri = uri.split('://')[-1]
@@ -18,20 +23,33 @@ def _get_conn_from_uri(uri):
     res = dict(username=username,password=password,host=host,port=port,db=db)
     return res
 
-def _post(*args,**kwargs):
-    print args
-    print 'TEARING DOWN SETUP!@@@!!'
-    print kwargs
-
 
 class ContentType(Document):
     name = StringField(max_length=255,unique=True)
     content_class = StringField(max_length=255,required=True)
 
 class ContentItem(EmbeddedDocument):
+    _content_classes = {
+            'text':TextContent,
+            'html':HTMLContent,
+            'code':CodeContent,
+            'image':ImageContent,
+            'video':VideoContent,
+            'url':URLContent,
+            'pdf':PDFContent,                
+    }
+
     name = StringField(max_length=255,unique=True)
     content_type = ReferenceField(ContentType)
     content_reference = StringField(max_length=255,unique=True,required=True)
+
+    def _set_content_type(self,content_type):
+        ct = ContentType.objects(name=ct)[0]
+        self.content_type = ct
+
+    def _set_content(self,content):
+        self.content_reference = self._content_classes[self.content_type.content_class](content)
+
 
 class SubTopic(EmbeddedDocument):
     name = StringField(max_length=255,unique=True)
@@ -65,8 +83,6 @@ def _pre(*args,**kwargs):
         print 'Done adding default content-types'
 
 
-post_init.connect(_post)
-pre_init.connect(_pre)
 
 def main():
     from t3 import MONGOLAB_URI
@@ -83,4 +99,5 @@ def main():
     talks = Talk.objects.all()
 
 
-main()
+if __name__ == "__main__":
+    main()
