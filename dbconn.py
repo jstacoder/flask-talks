@@ -20,7 +20,7 @@ def _get_info_from_url(uri):
 
 def get_connection():
     if 'MONGOLAB_URI' in os.environ:
-        conn = connect(**_get_conn_from_uri(os.environ.get('MONGOLAB_URI')))
+        conn = connect(**_get_info_from_uri(os.environ.get('MONGOLAB_URI')))
     else:
         conn = connect()
     return conn
