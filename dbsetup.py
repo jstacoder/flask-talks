@@ -1,10 +1,12 @@
 # coding: utf-8
 import os
+from dbconn import get_connection,get_connection_and_dbname
 from mongoengine import (
         Document, EmbeddedDocument, EmbeddedDocumentField , 
         EmbeddedDocumentListField, StringField , IntField, 
         BooleanField, EmailField , DateTimeField, DictField, 
-        ListField, ReferenceField, connect, pre_init, post_init
+        ListField, ReferenceField, pre_init, post_init,DynamicField,
+        ReferenceField
 )
 from content_types import (
             TextContent,HTMLContent,CodeContent,
@@ -12,91 +14,73 @@ from content_types import (
             PDFContent
 )
 
-def _get_conn_from_uri(uri):
-    uri = uri.split('://')[-1]
-    user_data,host_data =  uri.split('@')
-    username,password = user_data.split(':')
-    host,port = host_data.split(':')
-    port,db = port.split('/')
-    port = int(port)
+class ContentItem(Document):
+    content = DynamicField()
+    '''
+        type_code can be one of: text, html, code, or media
+    '''
+    type_code = StringField(max_length=255,default="text")
 
-    res = dict(username=username,password=password,host=host,port=port,db=db)
-    return res
-
-
-class ContentType(Document):
+class SubTopic(Document):
     name = StringField(max_length=255,unique=True)
-    content_class = StringField(max_length=255,required=True)
+    content_items = ListField(ReferenceField(ContentItem))
 
-class ContentItem(EmbeddedDocument):
-    _content_classes = {
-            'text':TextContent,
-            'html':HTMLContent,
-            'code':CodeContent,
-            'image':ImageContent,
-            'video':VideoContent,
-            'url':URLContent,
-            'pdf':PDFContent,                
-    }
+class SubTopicOrderItem(EmbeddedDocument):
+    content_item = ReferenceField(ContentItem)
+    order = IntField(required=True)
+           
+class SubTopicOrder(Document):
+    order_items = EmbeddedDocumentListField(SubTopicOrderItem)
+    sub_topic = ReferenceField(SubTopic)
 
+    def get_items(self,reverse=False):
+        items = []
+        for idx in range(len(self.order_items)):
+            for itm in self.order_items:
+                if itm.order == (idx+1):
+                    if not itm in items:
+                        items.append(itm)
+        return items if not reverse else reversed(items)
+
+    def save(self,sub_topic,order_map,*args,**kwargs):
+        self.sub_topic = sub_topic
+        for itm in sub_topic.content_items:
+            order_item = SubTopicOrderItem()
+            order_item.content_item = itm
+            order_item.order = order_map[str(itm.id)]
+            self.order_items.append(order_item)
+        return super(SubTopicOrder,self).save(*args,**kwargs)
+
+class Topic(Document):
     name = StringField(max_length=255,unique=True)
-    content_type = ReferenceField(ContentType)
-    content_reference = StringField(max_length=255,unique=True,required=True)
-
-    def _set_content_type(self,content_type):
-        ct = ContentType.objects(name=ct)[0]
-        self.content_type = ct
-
-    def _set_content(self,content):
-        self.content_reference = self._content_classes[self.content_type.content_class](content)
-
-
-class SubTopic(EmbeddedDocument):
-    name = StringField(max_length=255,unique=True)
-    content_items = EmbeddedDocumentListField(ContentItem)
-
-class Topic(EmbeddedDocument):
-    name = StringField(max_length=255,unique=True)
-    sub_topics = EmbeddedDocumentListField(SubTopic)
+    sub_topics = ListField(ReferenceField(SubTopic))
     
 class Talk(Document):
     name = StringField(max_length=255,unique=True)
-    topics = EmbeddedDocumentListField(Topic)
-
-first = True
-
-def _pre(*args,**kwargs):
-    global first
-    print 'SETTING UP DATABASE {}'.format(kwargs.get('document')._class_name)
-    #if kwargs['document'] is ContentType:
-    if first:
-        first = False
-        types = []
-        _types = [
-            'text','html','code','image','video','url','pdf'   
-        ]
-        _classes = [
-            'TextContent','HTMLContent','CodeContent','ImageContent','VideoContent','URLContent','PDFContent'
-        ]
-        for t in _types:
-            ContentType(**dict(name=t,content_class=_classes[_types.index(t)])).save()
-        print 'Done adding default content-types'
+    topics = ListField(ReferenceField(Topic))
 
 
+#pre_init.connect(_pre)
 
 def main():
-    from t3 import MONGOLAB_URI
-    conn = connect(MONGOLAB_URI)
-    data = _get_conn_from_uri(MONGOLAB_URI)
-    conn.drop_database(data['db'])
-    itm = ContentItem(name='justtst')
-    itm.content_type = ContentType.objects(name='text')[0]
-    itm.content_reference = 'refkey'
-    sub = SubTopic(name='programming',content_items=[itm])
-    topic = Topic(name='Python',sub_topics=[sub])
-    talk = Talk(name='first_talk',topics=[topic])
-    talk.save()
-    talks = Talk.objects.all()
+    #from t3 import MONGOLAB_URI
+    #conn = connect(MONGOLAB_URI)
+    #data = _get_conn_from_uri(MONGOLAB_URI)
+    #conn = connect(data)
+    #conn = connect(MONGOLAB_URI)
+    dbname,conn = get_connection_and_dbname()
+    db = conn[dbname]
+    conn.drop_database(db)
+    if len(Talk.objects.all()) == 0:
+        #_pre(document=ContentType)
+        itm = ContentItem()
+        itm.content = 'xxxxx'
+        itm.save()
+        sub = SubTopic(name='programming',content_items=[itm])
+        topic = Topic(name='Python',sub_topics=[sub])
+        talk = Talk(name='first_talk',topics=[topic])
+        talk.save()
+    print Talk.objects.all()
 
 
 if __name__ == "__main__":
