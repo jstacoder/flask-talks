@@ -74,10 +74,19 @@ def main():
     db = get_default_db()
     if len(Talk.objects.all()) == 0:
         #_pre(document=ContentType)
-        itm = ContentItem()
-        itm.content = 'xxxxx'
-        itm.save()
-        sub = SubTopic(name='programming',content_items=[itm]).save()
+        itm1 = ContentItem()
+        itm1.content = 'xxxxx'
+        itm1.save()
+        itm2 = ContentItem()
+        itm2.content = 'yyyyy'
+        itm2.save()
+        order = {
+            itm2.id:0,
+            itm1.id:1,
+        }
+        o = SubTopicOrder()
+        sub = SubTopic(name='programming',content_items=[itm1,itm2]).save()
+        o.save(sub,order)
         topic = Topic(name='Python',sub_topics=[sub]).save()
         talk = Talk(name='first_talk',topics=[topic]).save()        
     print Talk.objects.all()
