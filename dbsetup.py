@@ -68,9 +68,10 @@ def main():
     #data = _get_conn_from_uri(MONGOLAB_URI)
     #conn = connect(data)
     #conn = connect(MONGOLAB_URI)
-    dbname,conn = get_connection_and_dbname()
-    db = conn[dbname]
-    conn.drop_database(db)
+    #dbname,conn = get_connection_and_dbname()
+    #db = conn[dbname]
+    #conn.drop_database(db)
+    db = get_default_db()
     if len(Talk.objects.all()) == 0:
         #_pre(document=ContentType)
         itm = ContentItem()
