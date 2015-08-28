@@ -81,8 +81,8 @@ def main():
         itm2.content = 'yyyyy'
         itm2.save()
         order = {
-            itm2.id:0,
-            itm1.id:1,
+            str(itm2.id):0,
+            str(itm1.id):1,
         }
         o = SubTopicOrder()
         sub = SubTopic(name='programming',content_items=[itm1,itm2]).save()
