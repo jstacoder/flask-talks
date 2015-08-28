@@ -77,10 +77,9 @@ def main():
         itm = ContentItem()
         itm.content = 'xxxxx'
         itm.save()
-        sub = SubTopic(name='programming',content_items=[itm])
-        topic = Topic(name='Python',sub_topics=[sub])
-        talk = Talk(name='first_talk',topics=[topic])
-        talk.save()
+        sub = SubTopic(name='programming',content_items=[itm]).save()
+        topic = Topic(name='Python',sub_topics=[sub]).save()
+        talk = Talk(name='first_talk',topics=[topic]).save()        
     print Talk.objects.all()
 
 
