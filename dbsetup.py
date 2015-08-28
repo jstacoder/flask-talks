@@ -1,6 +1,6 @@
 # coding: utf-8
 import os
-from dbconn import get_connection,get_connection_and_dbname
+from dbconn import get_connection,get_connection_and_dbname,get_default_db
 from mongoengine import (
         Document, EmbeddedDocument, EmbeddedDocumentField , 
         EmbeddedDocumentListField, StringField , IntField, 
