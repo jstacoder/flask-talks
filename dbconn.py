@@ -1,6 +1,6 @@
 import os
 from mongoengine import connect
-from pymongo.errors import ConfigurationError,OperationalFailure
+from pymongo.errors import ConfigurationError,OperationFailure
 
 def _get_conn_from_uri(uri):
     conn = connect(**_get_info_from_url(uri))
@@ -39,7 +39,7 @@ def get_default_db():
     try:
         if dbname in conn.database_names():
             rtn = conn[dbname]
-    except OperationalFailure:
+    except OperationFailure:
         pass
     try:
         rtn = conn.get_default_database()
