@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+    {% block content %}
+    <div class=row>
+        <div class="col-md-3 col-md-offset-4">
+            <h1 class="display-1 text-capitalize">{{ talk['title'] }}</h1>
+
+            {% for topic in talk['topics'] %}            
+                <h2 class="lead">{{ topic['name'] }}</h2>
+                {% for sub in topic['sub_topics'] %}                    
+                    <div class="text-center card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ sub['name'] }}</h3>
+                    </div>
+                    <div class="card-block">
+                    {% for content in sub['content_items'] %}
+                        {% if content['order'] == loop.index0 %}
+                            {{ content['content'] }}
+                        {% endif %}
+                    {% endfor %}   
+                    </div>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endblock %}

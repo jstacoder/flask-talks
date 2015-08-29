@@ -1,5 +1,6 @@
 # coding: utf-8
 import os
+import json
 from dbconn import get_connection,get_connection_and_dbname,get_default_db
 from mongoengine import (
         Document, EmbeddedDocument, EmbeddedDocumentField , 
@@ -20,44 +21,47 @@ class ContentItem(Document):
         type_code can be one of: text, html, code, or media
     '''
     type_code = StringField(max_length=255,default="text")
+    order = IntField(required=True)
 
 class SubTopic(Document):
     name = StringField(max_length=255,unique=True)
     content_items = ListField(ReferenceField(ContentItem))
 
-class SubTopicOrderItem(EmbeddedDocument):
-    content_item = ReferenceField(ContentItem)
-    order = IntField(required=True)
-           
-class SubTopicOrder(Document):
-    order_items = EmbeddedDocumentListField(SubTopicOrderItem)
-    sub_topic = ReferenceField(SubTopic)
+    def to_json(self):
+        rtn = super(SubTopic,self).to_json()
+        rtn = json.loads(rtn)
+        rtn['content_items'] = [json.loads(x.to_json()) for x in self.content_items]
+        return json.dumps(rtn)
 
-    def get_items(self,reverse=False):
-        items = []
-        for idx in range(len(self.order_items)):
-            for itm in self.order_items:
-                if itm.order == (idx+1):
-                    if not itm in items:
-                        items.append(itm)
-        return items if not reverse else reversed(items)
+    def get_content(self,reverse=False):
+        rtn = []
+        for idx in range(len(self.content_items)):
+            for c in self.content_items:
+                if c.order == idx:
+                    rtn.append(c)
+        return rtn if not reverse else reversed(rtn)
 
-    def save(self,sub_topic,order_map,*args,**kwargs):
-        self.sub_topic = sub_topic
-        for itm in sub_topic.content_items:
-            order_item = SubTopicOrderItem()
-            order_item.content_item = itm
-            order_item.order = order_map[str(itm.id)]
-            self.order_items.append(order_item)
-        return super(SubTopicOrder,self).save(*args,**kwargs)
 
 class Topic(Document):
     name = StringField(max_length=255,unique=True)
     sub_topics = ListField(ReferenceField(SubTopic))
+
+    def to_json(self):
+        rtn = super(Topic,self).to_json()
+        rtn = json.loads(rtn)
+        rtn['sub_topics'] = [json.loads(x.to_json()) for x in self.sub_topics]
+        return json.dumps(rtn)
+
     
 class Talk(Document):
     name = StringField(max_length=255,unique=True)
     topics = ListField(ReferenceField(Topic))
+
+    def to_json(self):
+        rtn = super(Talk,self).to_json()
+        rtn = json.loads(rtn)
+        rtn['topics'] = [json.loads(x.to_json()) for x in self.topics]
+        return json.dumps(rtn)
 
 
 #pre_init.connect(_pre)
@@ -76,20 +80,20 @@ def main():
         #_pre(document=ContentType)
         itm1 = ContentItem()
         itm1.content = 'xxxxx'
+        itm1.order = 1
         itm1.save()
         itm2 = ContentItem()
         itm2.content = 'yyyyy'
+        itm2.order = 0
         itm2.save()
-        order = {
-            str(itm2.id):0,
-            str(itm1.id):1,
-        }
-        o = SubTopicOrder()
         sub = SubTopic(name='programming',content_items=[itm1,itm2]).save()
-        o.save(sub,order)
         topic = Topic(name='Python',sub_topics=[sub]).save()
         talk = Talk(name='first_talk',topics=[topic]).save()        
     print Talk.objects.all()
+    t = Talk.objects.all()[0]
+    print '{}:\n\n\t'.format(t.topics[0].sub_topics[0].name)+'\n\t'.join(map(str,map(lambda x: x.content,t.topics[0].sub_topics[0].get_content())))
+    
+
 
 
 if __name__ == "__main__":

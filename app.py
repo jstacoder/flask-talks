@@ -1,22 +1,32 @@
 import os
+from inflection import pluralize
 from dbsetup import Topic,SubTopic,Talk,ContentItem
 from dbconn import get_connection_and_dbname, get_default_db
 from flask import views,g
 import json
 import flask
 
+class MyFlask(flask.Flask):
+    jinja_opts = dict(flask.Flask.jinja_options)
+    jinja_opts.setdefault('extensions',
+            []).append('jinja2.ext.with_')
+
+
+
 def add_talk(name,topics=None):
-    talk = Talk()
-    talk.name = name
+    talk = Talk(name=name)
     if topics is not None:
         for t in topics:
-            _topic = topics[t]['topic']
-            _subs = topics[t]['sub_topics']
-            add_topic(talk,_topic,_subs)
+            if not type(t) == Topic:
+                _topic = t['topic']
+                _subs = t['sub_topics']
+                add_topic(talk,_topic,_subs)
+            else:
+                add_topic(talk,t)
     return talk.save()
 
 def add_topic(talk,name,sub_topics=None):
-    topic = Topic(name=name)
+    topic = Topic(name=name).save() if type(name) == str else name
     if sub_topics is not None:
         for s in sub_topics:
             add_sub_topic(topic,s['name'],s['content_items'])
@@ -27,23 +37,22 @@ def add_sub_topic(topic,name,content_items=None):
     sub_topic = SubTopic(name=name)
     if content_items is not None:
         for c in content_items:
-            add_content_item(sub_topic,c['name'],c['content_type'],c['content'])        
+            add_content_to_subtopic(sub_topic,c['content'],c['order'])
     topic.sub_topics.append(sub_topic)
-    return topic
+    return topic.save()
 
-def add_content_item(content):
-    item = ContentItem(content=content)
-    item.content = content
-    return item.save()
-
-def add_content_to_subtopic(sub_topic,content):
+def add_content_item(content,order):
+    return ContentItem(content=content,order=order).save()
+    
+def add_content_to_subtopic(sub_topic,content,order=None):
     if not type(content) == ContentItem:
-        content = add_content_item(content)
+        order = sub_topic.content_items.count() if order is None else order
+        content = add_content_item(content,order)
     sub_topic.content_items.append(content)
     return sub_topic.save()
 
 
-app = flask.Flask(__name__)
+app = MyFlask(__name__)
 api = flask.Blueprint(__name__+'api','api',url_prefix='/api/v1')
 
 
@@ -63,23 +72,55 @@ class AddTalkView(views.MethodView):
         talks = [dict(json.loads(x.to_json())) for x in Talk.objects.all()]
         return flask.jsonify(talks=talks)
 
-class AddView(views.MethodView):
-    _model = None
+class AddTalksView(views.MethodView):
+    _model = Talk
 
     def post(self):
-        ins = get_from_form(self._model).save()
+        print str(flask.request.form)
+        talk = self._model(name=flask.request.form['name']).save()
+        return flask.jsonify(talk=json.loads(talk.to_json()))
+
+class AddTopicView(views.MethodView):
+    def post(self):
+        talk = Talk.objects(id=flask.request.form['talk_id'])
+        talk = (len(talk)>0) and talk[0]
+        topic = Topic(name=flask.request.form['name']).save()
+        talk.topics.append(topic)
+        talk.save()
+        return flask.jsonify(talk=json.loads(talk.to_json()))
+
+class AddSubTopicView(views.MethodView):
+    def post(self):
+        topic = Topic.objects(id=flask.request.form['topic_id'])
+        topic = (len(topic)>0) and topic[0]
+        sub_topic = SubTopic(name=flask.request.form['name']).save()
+        topic.sub_topics.append(sub_topic)
+        topic.save()
+        return flask.jsonify(topic=json.loads(topic.to_json()))
+
+class AddContentView(views.MethodView):
+    def post(self):
+        sub_topic = SubTopic.objects(id=flask.request.form['sub_topic_id'])
+        sub_topic = (len(sub_topic)>0) and sub_topic[0]
+        content = ContentItem(content=flask.request.form['content'],order=flask.request.form['order']).save()
+        sub_topic.content_items.append(content)
+        sub_topic.save()
+        return flask.jsonify(sub_topic=json.loads(sub_topic.to_json()))
 
 class TstView(views.MethodView):
     def post(self):
         c = ContentItem(**flask.request.form).save()
-        return flask.jsonify(dict(json.loads(c.to_json())))
+        return flask.jsonify(talk=c.to_json())
 
 class ShowView(views.MethodView):
     _model = None
 
     def get(self,item_id=None):
+        item_name = self._model.__name__.lower()
+        if item_id is None:
+            item_name = pluralize(item_name)
         item = dict(json.loads(self._model.objects(id=item_id)[0].to_json())) if item_id is not None else [dict(json.loads(x.to_json())) for x in self._model.objects.all()]
-        return flask.jsonify(item=item)
+        return flask.jsonify({item_name:item})
 
 class ShowTalkView(ShowView):
     _model = Talk
@@ -87,16 +128,92 @@ class ShowTalkView(ShowView):
 class ShowContentItemView(ShowView):
     _model = ContentItem
 
+class ShowTopicView(ShowView):
+    _model = Topic
+
+class ShowSubTopicView(ShowView):
+    _model = SubTopic
+
 api.add_url_rule('/talks/','index',view_func=AddTalkView.as_view('index'))
 api.add_url_rule('/talks/<item_id>','show_talks',view_func=ShowTalkView.as_view('show_talks'))
+api.add_url_rule('/topics/','topics',view_func=ShowTopicView.as_view('topics'))
+api.add_url_rule('/topics/<item_id>','show_topics',view_func=ShowTopicView.as_view('show_topics'))
+api.add_url_rule('/subtopics/','subtopics',view_func=ShowSubTopicView.as_view('subtopics'))
+api.add_url_rule('/subtopics/<item_id>','show_subtopics',view_func=ShowSubTopicView.as_view('show_subtopics'))
 api.add_url_rule('/content/','content',view_func=ShowContentItemView.as_view('content'))
 api.add_url_rule('/content/<item_id>','show_content_item',view_func=ShowContentItemView.as_view('show_content_item'))
 api.add_url_rule('/test/','show_test',view_func=TstView.as_view('test'))
+api.add_url_rule('/test_talk','talk_test',view_func=AddContentView.as_view('talk_test'))
+api.add_url_rule('/talks/add/','add_talk',view_func=AddTalksView.as_view('add_talk'))
+api.add_url_rule('/topics/add/','add_topic',view_func=AddTopicView.as_view('add_topic'))
+api.add_url_rule('/subtopics/add/','add_sub',view_func=AddSubTopicView.as_view('add_sub'))
+api.add_url_rule('/content/add/','add_content',view_func=AddContentView.as_view('add_content'))
+
 
 app.register_blueprint(api)
 
+front = flask.Blueprint(__name__+'front','front',url_prefix='/talks',template_folder=os.path.dirname(__file__))
+
+class FrontIndexView(views.MethodView):
+
+    def get(self):
+        talk_names = [{'name':t.name,'id':str(t.id)} for t in  Talk.objects.all()]    
+        return flask.render_template('front.html',talk_names=talk_names)
+
+class FrontTalkView(views.MethodView):
+
+    def get(self,talk_id):
+        talk = Talk.objects(id=talk_id)
+        talk = (len(talk)>0) and talk[0]
+        rtn = format_talk(talk.to_json())
+        return flask.render_template('talks.html',talk=rtn)
+
+
+front.add_url_rule('/','index',view_func=FrontIndexView.as_view('index'))
+front.add_url_rule('/view/<talk_id>/','view_talk',view_func=FrontTalkView.as_view('view_talk'))
+
+app.register_blueprint(front)
+ 
+
+
+def format_talk(talk_data):
+    if type(talk_data) == str:
+        talk_data = json.loads(talk_data)
+    title = talk_data['name']
+    topics = talk_data['topics']
+    sub_topics = {x['_id']["$oid"]:x['sub_topics'] for x in topics}
+    content_items = {}
+    for t in topics:
+        for s in sub_topics[t['_id']['$oid']]:
+            if content_items.get(s['_id']['$oid']):
+                content_items[s['_id']['$oid']].extend(s['content_items'])
+            else:
+                content_items[s['_id']['$oid']] = s['content_items']    
+    return dict(title=title,topics=topics,sub_topics=sub_topics,content_items=content_items)
+
+def display_talk(formatted_talk):
+    print formatted_talk['title']+'\n\n'
+    for t in formatted_talk['topics']:
+        print '\t'+t['name']+'\n\n'
+        for s in formatted_talk['sub_topics'][t['_id']['$oid']]:
+            print '\t\t'+s['name']+'\n\n'
+            for content in formatted_talk['content_items'][s['_id']['$oid']]:
+                print '\t\t\t'+content['content']
+
+def get_display_talk(formatted_talk):
+    rtn = ''
+    rtn += "\nTalk Title: "+formatted_talk['title']+'\n\nTopics:\n'
+    for t in formatted_talk['topics']:
+        rtn += '\t'+t['name']+'\n\n'
+        for s in formatted_talk['sub_topics'][t['_id']['$oid']]:
+            rtn += '\n\t\t'+s['name']
+            for content in formatted_talk['content_items'][s['_id']['$oid']]:
+                rtn += '\n\t\t\t'+content['content']
+    return rtn
 
 if __name__ == "__main__":
+
+    print os.path.dirname(__file__)
     dbname, conn= get_connection_and_dbname()
     db = conn['test']
     topics = {
