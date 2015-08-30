@@ -3,7 +3,7 @@
 ##A tool for use when giving presentations
 
 
-Try out the demo on [heroku](https://tranquil-brook-2865.herokuapp.com/talks/)
+Try out the demo on [heroku](https://flask-talks-demo.herokuapp.com/talks/)
 
 or just start the demo on your own heroku account with __One Click__!
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
