@@ -262,14 +262,25 @@ class FrontSubView(views.MethodView):
 
 class DeleteView(views.MethodView):
     _model = None
+    _endpoint = '.index'
+    _query_arg = {}
 
     def get(self,obj_id):
         obj = get_by_id(self._model,obj_id)
         obj.delete()
-        return flask.redirect(flask.url_for('.index'))        
+        if self._query_arg:
+            self._query_arg = {
+                    self._query_arg:flask.request.args[self._query_arg]
+            }
+        return flask.redirect(flask.url_for(self._endpoint,**self._query_arg))        
 
 class DeleteTalkView(DeleteView):
     _model = Talk
+
+class DeleteTopicView(DeleteView):
+    _model = Topic
+    _endpoint = '.view_talk'
+    _query_arg = 'talk_id'
 
 
 
@@ -283,6 +294,7 @@ front.add_url_rule('/content/add/<sub_id>/','add_content',view_func=FrontAddCont
 front.add_url_rule('/topic/add/<talk_id>/','add_topic',view_func=FrontAddTopicView.as_view('add_topic'))
 front.add_url_rule('/subtopic/add/<topic_id>/','add_subtopic',view_func=FrontAddSubTopicView.as_view('add_subtopic'))
 front.add_url_rule('/delete/<obj_id>','delete_talk',view_func=DeleteTalkView.as_view('delete_talk'))
+front.add_url_rule('/delete/topic/<obj_id>','delete_topic',view_func=DeleteTopicView.as_view('delete_topic'))
 
 
 

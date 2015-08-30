@@ -61,7 +61,7 @@ class Talk(Document):
     def to_json(self):
         rtn = super(Talk,self).to_json()
         rtn = json.loads(rtn)
-        rtn['topics'] = [json.loads(x.to_json()) for x in self.topics]
+        rtn['topics'] = [json.loads(x.to_json()) for x in self.topics if type(x) == Topic]
         return json.dumps(rtn)
 
 
