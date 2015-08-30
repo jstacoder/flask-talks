@@ -118,7 +118,7 @@ function TalkCtrl($scope,$http,talkHolder,$window){
     console.log('im  here');
 
     $scope.addTopic = function(){
-        document.forms[1].submit();
+        document.forms[0].submit();
     }
 
     $scope.addSubtopic = function(name){
