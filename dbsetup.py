@@ -21,6 +21,7 @@ class ContentItem(Document):
         type_code can be one of: text, html, code, or media
     '''
     type_code = StringField(max_length=255,default="text")
+    bullet = StringField(max_length=50,default='A note about the topic')
     order = IntField(required=True)
 
 class SubTopic(Document):

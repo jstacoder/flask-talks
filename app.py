@@ -2,16 +2,22 @@ import os
 from inflection import pluralize
 from dbsetup import Topic,SubTopic,Talk,ContentItem
 from dbconn import get_connection_and_dbname, get_default_db
+from app_forms import AddTalkForm,AddTopicForm,AddContentForm,AddSubTopicForm
 from flask import views,g
 import json
 import flask
+from csrf import crossdomain
+import jinja2_highlight
+
+
+def get_by_id(model,_id):
+    obj = model.objects(id=_id)
+    return (len(obj)>0) and obj[0]
 
 class MyFlask(flask.Flask):
     jinja_opts = dict(flask.Flask.jinja_options)
     jinja_opts.setdefault('extensions',
-            []).append('jinja2.ext.with_')
-
-
+            []).append('jinja2_highlight.HighlightExtension')
 
 def add_talk(name,topics=None):
     talk = Talk(name=name)
@@ -65,6 +71,7 @@ def connect_redis(self):
     g._cache = Redis(host=host)
 
 class AddTalkView(views.MethodView):
+    decorators = [crossdomain(origin='*')]
     def post(self):
         add_talk(request.form.get('title'),request.form.get('topics'))
 
@@ -73,11 +80,13 @@ class AddTalkView(views.MethodView):
         return flask.jsonify(talks=talks)
 
 class AddTalksView(views.MethodView):
+    decorators = [crossdomain(origin='*')]
     _model = Talk
 
     def post(self):
         print str(flask.request.form)
-        talk = self._model(name=flask.request.form['name']).save()
+        print str(flask.request.json)
+        talk = self._model(name=flask.request.json['name']).save()
         return flask.jsonify(talk=json.loads(talk.to_json()))
 
 class AddTopicView(views.MethodView):
@@ -102,7 +111,7 @@ class AddContentView(views.MethodView):
     def post(self):
         sub_topic = SubTopic.objects(id=flask.request.form['sub_topic_id'])
         sub_topic = (len(sub_topic)>0) and sub_topic[0]
-        content = ContentItem(content=flask.request.form['content'],order=flask.request.form['order']).save()
+        content = ContentItem(content=flask.request.form['content'],order=flask.request.form['order'],bullet=flask.request.form['bullet']).save()
         sub_topic.content_items.append(content)
         sub_topic.save()
         return flask.jsonify(sub_topic=json.loads(sub_topic.to_json()))
@@ -123,6 +132,9 @@ class ShowView(views.MethodView):
         return flask.jsonify({item_name:item})
 
 class ShowTalkView(ShowView):
+
+    decorators = [crossdomain(origin='*')]
+
     _model = Talk
 
 class ShowContentItemView(ShowView):
@@ -152,6 +164,12 @@ api.add_url_rule('/content/add/','add_content',view_func=AddContentView.as_view(
 
 app.register_blueprint(api)
 
+@app.context_processor
+def add_get_id():
+    return {
+            'get_id':lambda itm: hasattr(itm,'_id') and getattr(getattr(itm,'_id'),'$id')
+           }
+
 front = flask.Blueprint(__name__+'front','front',url_prefix='/talks',template_folder=os.path.dirname(__file__))
 
 class FrontIndexView(views.MethodView):
@@ -166,20 +184,101 @@ class FrontTalkView(views.MethodView):
         talk = Talk.objects(id=talk_id)
         talk = (len(talk)>0) and talk[0]
         rtn = format_talk(talk.to_json())
-        return flask.render_template('talks.html',talk=rtn)
+        return flask.render_template('talks.html',talk=rtn,talk_id=talk_id)
+
+class FrontAddTalkView(views.MethodView):
+
+    def get(self):
+        form = AddTalkForm()
+        return flask.render_template('add-talk.html',form=form)
+
+class FrontAddTopicView(views.MethodView):
+
+    def get(self,talk_id):
+        form = AddTopicForm(talk=talk_id)
+        return flask.render_template('add-topic.html',form=form)
+
+    def post(self,talk_id):
+        talk = get_by_id(Talk,talk_id)
+        form = flask.request.form
+        topic = Topic(name=form['name']).save()
+        talk.topics.append(topic)
+        talk.save()
+        return flask.redirect(flask.url_for('.view_talk',talk_id=talk_id))
+
+class FrontAddSubTopicView(views.MethodView):
+
+    def get(self,topic_id):
+        form = AddSubTopicForm(topic=topic_id)
+        return flask.render_template('add-sub-topic.html',form=form)
+
+    def post(self,topic_id):
+        topic = get_by_id(Topic,topic_id)
+        form = flask.request.form
+        sub_topic = SubTopic(name=form['name']).save()
+        topic.sub_topics.append(sub_topic)
+        topic.save()
+        return flask.redirect(flask.url_for('.view_topic',topic_id=topic_id))
+
+class FrontAddContentView(views.MethodView):
+
+    def get(self,sub_id):
+        form = AddContentForm(sub=sub_id)
+        return flask.render_template('add_content.html',form=form)
+
+    def post(self,sub_id):
+        sub = get_by_id(SubTopic,sub_id)
+        form = flask.request.json    
+        content = ContentItem(content=form['content'],bullet=form['bullet'],type_code=form['type_code'],order=form['order']).save()
+        sub.content_items.append(content)
+        sub.save()
+        return flask.redirect(flask.url_for('.view_sub',sub_id=sub_id))
+
+class FrontContentView(views.MethodView):
+    def get(self,content_id):
+        content = get_by_id(ContentItem,content_id)
+        sub = filter(lambda x: content in x.content_items,SubTopic.objects.all())[0]
+        topic = filter(lambda x: sub in x.sub_topics,Topic.objects.all())[0]
+        talk = filter(lambda x: topic in x.topics,Talk.objects.all())[0]
+        other_items = sub.content_items
+        idx = other_items.index(content)
+        prev_item = (len(other_items) > 1 and idx != 0) and other_items[idx-1].id
+        next_item = (len(other_items) >= 2 and idx != (len(other_items)-1)) and other_items[idx+1].id
+        return flask.render_template('content.html',content=content.content.strip(),is_code=True,prev_id=prev_item,next_id=next_item,talk=talk)
+
+class FrontTopicView(views.MethodView):
+    def get(self,topic_id):
+        topic = get_by_id(Topic,topic_id)
+        talk = filter(lambda x: topic in x.topics,Talk.objects.all())[0]
+        return flask.render_template('topic.html',topic=topic,talk=talk)
+
+class FrontSubView(views.MethodView):
+    def get(self,sub_id):        
+        sub = get_by_id(SubTopic,sub_id)
+        topic = filter(lambda x: sub in x.sub_topics,Topic.objects.all())[0]
+        sub = dict(content_items=sub.content_items,name=sub.name,id=sub_id)
+        return flask.render_template('sub.html',sub=sub,topic=topic)
 
 
 front.add_url_rule('/','index',view_func=FrontIndexView.as_view('index'))
 front.add_url_rule('/view/<talk_id>/','view_talk',view_func=FrontTalkView.as_view('view_talk'))
+front.add_url_rule('/add/','add_talk',view_func=FrontAddTalkView.as_view('add_talk'))
+front.add_url_rule('/view/content/<content_id>/','view_content',view_func=FrontContentView.as_view('view_content'))
+front.add_url_rule('/view/topic/<topic_id>/','view_topic',view_func=FrontTopicView.as_view('view_topic'))
+front.add_url_rule('/view/sub/<sub_id>/','view_sub',view_func=FrontSubView.as_view('view_sub'))
+front.add_url_rule('/content/add/<sub_id>/','add_content',view_func=FrontAddContentView.as_view('add_content'))
+front.add_url_rule('/topic/add/<talk_id>/','add_topic',view_func=FrontAddTopicView.as_view('add_topic'))
+front.add_url_rule('/subtopic/add/<topic_id>/','add_subtopic',view_func=FrontAddSubTopicView.as_view('add_subtopic'))
+
+
 
 app.register_blueprint(front)
- 
-
 
 def format_talk(talk_data):
     if type(talk_data) == str:
         talk_data = json.loads(talk_data)
     title = talk_data['name']
+    talk_id = talk_data['_id']['$oid']
     topics = talk_data['topics']
     sub_topics = {x['_id']["$oid"]:x['sub_topics'] for x in topics}
     content_items = {}
@@ -189,7 +288,7 @@ def format_talk(talk_data):
                 content_items[s['_id']['$oid']].extend(s['content_items'])
             else:
                 content_items[s['_id']['$oid']] = s['content_items']    
-    return dict(title=title,topics=topics,sub_topics=sub_topics,content_items=content_items)
+    return dict(title=title,topics=topics,sub_topics=sub_topics,content_items=content_items,talk_id=talk_id)
 
 def display_talk(formatted_talk):
     print formatted_talk['title']+'\n\n'
@@ -211,7 +310,14 @@ def get_display_talk(formatted_talk):
                 rtn += '\n\t\t\t'+content['content']
     return rtn
 
+@app.after_request
+def add_header(response):
+    response.headers['Access-Control-Allow-Origin'] = 'http://ang.com'
+    return response
+
+
 if __name__ == "__main__":
+
 
     print os.path.dirname(__file__)
     dbname, conn= get_connection_and_dbname()
@@ -241,5 +347,3 @@ if __name__ == "__main__":
     #print list(db.talk.find({}))
     port = int(os.environ.get('PORT',5555))
     app.run(host='0.0.0.0',port=port,debug=True)
-        
-

@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+    {% macro render_field(field,label=false) %}
+        <div class="form-group">
+            {% if label %}
+                <label class="control-label">{{ label }}</label>
+            {% endif %}
+                {% set model = "addContent.%s" % field.name %}
+                {{ field(get_hidden=1,class_='form-control',ng_model=model) }}
+        </div>
+    {% endmacro %}
+    {% block content %}
+    <div class=row>
+        <div class="col-md-7 col-md-offset-2" ng-controller="AddContentCtrl as ctrl">
+            <form class=form method="post" name="addContentForm">
+                <fieldset>
+                    <legend>Add Content</legend>
+                    {% for f in form %}
+                        {% if f.type != 'HiddenField' %}
+                            {{ render_field(f,f.label.text ) }}
+                        {% else %}
+                            {{ render_field(f) }}
+                        {% endif %}
+                    {% endfor %}
+                    <button  class="btn btn-success" type="submit" ng-click="ctrl.submit(addContentForm)">Add</button>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    {% endblock %}
+
