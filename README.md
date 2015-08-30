@@ -32,23 +32,23 @@ The summary is layed out like this:
 
 ###First Topic name
 
-    * ####First sub topic name
-        1. [first content bullet](#)
-        2. [Second content bullet](#)
+  * ####First sub topic name
+    1. [first content bullet](#)
+    2. [Second content bullet](#)
 
-    * ####Second sub topic name
-        1. [first content bullet](#)
-        2. [Second content bullet](#)
+  * ####Second sub topic name
+    1. [first content bullet](#)
+    2. [Second content bullet](#)
 
 ###Second Topic name
 
-    * ####First sub topic name
-        1. [first content bullet](#)
-        2. [Second content bullet](#)
+  * ####First sub topic name
+    1. [first content bullet](#)
+    2. [Second content bullet](#)
 
-    * ####Second sub topic name
-        1. [first content bullet](#)
-        2. [Second content bullet](#)
+  * ####Second sub topic name
+    1. [first content bullet](#)
+    2. [Second content bullet](#)
 
 
 each `content_item` bullet is a link to the content page for that `content_item`
