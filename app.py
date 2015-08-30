@@ -8,7 +8,10 @@ import json
 import flask
 from csrf import crossdomain
 import jinja2_highlight
+from click_counter import get_counter,cache_count,check_cache,set_session,check_session
 
+
+add_click = get_counter('flask-talks.herokuapp.com')
 
 def get_by_id(model,_id):
     obj = model.objects(id=_id)
@@ -62,13 +65,18 @@ app = MyFlask(__name__)
 api = flask.Blueprint(__name__+'api','api',url_prefix='/api/v1')
 
 
-#@app.before_first_request
-
-def connect_redis(self):
-    host = 'localhost'
-    if 'REDISCLOUD_URL' in os.environ:
-        host = os.environ.get('REDISCLOUD_URL')
-    g._cache = Redis(host=host)
+@app.before_request
+def connect_redis():
+    #host = 'localhost'
+    #if 'REDISCLOUD_URL' in os.environ:
+    #    g._cache = from_url(os.environ.get('REDISCLOUD_URL'))
+    #else:
+    #    g._cache = Redis()
+    #print '\n'.join(map(str,flask.request.environ.keys()))
+    if not check_cache():
+        cache_count()
+        add_click()
+        print 'added click'
 
 class AddTalkView(views.MethodView):
     decorators = [crossdomain(origin='*')]
