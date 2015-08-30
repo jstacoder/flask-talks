@@ -1,9 +1,0 @@
-{% extends 'layout.html' %}
-    {% block content %}
-    <a class="btn btn-primary btn-sm" href="{{ url_for('.view_topic',topic_id=topic.id)}}">back to topic</a>
-        <h1 class=lead>{{ sub['name'] }}</h1>
-        {% for c in sub['content_items'] %}
-            <p>{{ loop.index }} <a href="{{ url_for('.view_content',content_id=c.id) }}">{{ c.bullet }}</a></p>
-        {% endfor %}
-        <a  class="btn btn-primary" href="/talks/content/add/{{ sub['id'] }}">add content</a>
-    {% endblock %}
