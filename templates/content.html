@@ -8,8 +8,12 @@
                         {% highlight code_language|default('python') -%}
                             {{ content|safe }}
                         {%- endhighlight %}
-                    {% else %}
+                    {% elif is_markdown %}
+                        {{ content | markdown | safe }}
+                    {% elif is_html %}
                         {{ content | safe }}
+                    {% else %}
+                        {{ content }}
                     {% endif %}
                     <div class=card-footer>
                         <div class=row>

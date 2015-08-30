@@ -7,6 +7,7 @@ from flask import views,g
 import json
 import flask
 from csrf import crossdomain
+from markdown2 import markdown as md
 import jinja2_highlight
 from click_counter import get_counter,cache_count,check_cache,set_session,check_session
 
@@ -64,6 +65,10 @@ def add_content_to_subtopic(sub_topic,content,order=None):
 app = MyFlask(__name__)
 api = flask.Blueprint(__name__+'api','api',url_prefix='/api/v1')
 
+
+@app.template_filter
+def markdown(s):
+    return md(s)
 
 @app.before_request
 def connect_redis():
