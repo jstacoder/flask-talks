@@ -1,4 +1,4 @@
-#Flask-Talks <small>(Using The Brand New Bootstrap V4.0alpha)</small>
+#Flask-Talks <br/>(Using Bootstrap V4.0alpha)
 
 ##A tool for use when giving presentations
 
