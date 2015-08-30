@@ -22,11 +22,6 @@
     "addons": [
         "rediscloud:30",
         "mongolab:sandbox"
-    ],
-    "buildpacks": [
-        {
-            "url":"https://github.com/ddollar/heroku-buildpack-python"
-        }
     ]
 }
 
