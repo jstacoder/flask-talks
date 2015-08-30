@@ -8,12 +8,16 @@
         </div>
     {% endmacro %}
     {% block content %}
-        <form class=form method="post">
-            <fieldset>
-                <legend>Add Sub Topic</legend>
-                {{ render_field(form.name) }}
-                {{ render_field(form.topic) }}
-                <a class="btn btn-primary-outline" ng-click="addTopic()">Add SubTopic</a>
-            </fieldset>
-        </form>
+        <div class=row>
+            <div class="col-md-6 col-md-offset-3">
+                <form class=form method="post">
+                    <fieldset>
+                        <legend>Add Sub Topic</legend>
+                        {{ render_field(form.name) }}
+                        {{ render_field(form.topic) }}
+                        <a class="btn btn-primary-outline" ng-click="addTopic()">Add SubTopic</a>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
     {% endblock %}

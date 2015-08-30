@@ -1,9 +1,24 @@
 {% extends 'layout.html' %}
     {% block content %}
-    <a class="btn btn-primary btn-sm" href="{{ url_for('.view_topic',topic_id=topic.id)}}">back to topic</a>
-        <h1 class=lead>{{ sub['name'] }}</h1>
+    <div class=row>
+        <div class="col-md-2 col-md-offset-2">
+            <a class="btn btn-primary btn-sm" href="{{ url_for('.view_topic',topic_id=topic.id)}}">back to topic</a>
+        </div>
+        <div class=col-md-4>
+            <h1>{{ sub['name'] }}</h1>
+        </div>
+    </div>
+    <div class=row>
         {% for c in sub['content_items'] %}
-            <p>{{ loop.index }} <a href="{{ url_for('.view_content',content_id=c.id) }}">{{ c.bullet }}</a></p>
+            <div class="col-md-6 col-md-offset-4">
+                <p>{{ loop.index }} <a style="color:black;" href="{{ url_for('.view_content',content_id=c.id) }}">{{ c.bullet }}</a></p>
+                <hr />
+            </div>            
         {% endfor %}
-        <a  class="btn btn-primary" href="/talks/content/add/{{ sub['id'] }}">add content</a>
+    </div>
+    <div class=row>
+        <div class="col-md-2 col-md-offset-4">
+            <a  class="btn btn-primary" href="/talks/content/add/{{ sub['id'] }}">add content</a>
+        </div>
+    </div>
     {% endblock %}

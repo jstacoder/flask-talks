@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
     {% block content %}
                     <div class=row>
-                        <div class="col-md-3 col-md-offset-5">                            
+                        <div class="col-md-5 col-md-offset-3">                            
                         {% for t in talk_names %}
                         <div class=card>                        
-                            <div class="card-title text-center">                                
+                            <div class="card-block card-title text-center">                                
                                 {{ t['name'] }}       
                             </div>
-                            <div class="card-box row">
+                            <div class="card-block row">
                                 <div class="col-md-6">
                                     <a class="btn btn-block group-btn btn-primary-outline" href="/talks/view/{{ t['id'] }}">view</a>
                                 </div>

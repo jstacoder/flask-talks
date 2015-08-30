@@ -17,7 +17,7 @@ class ContentItem(Document):
     '''
     type_code = StringField(max_length=255,default="text")
     bullet = StringField(max_length=50,default='A note about the topic')
-    order = IntField(required=True)
+    order = IntField(default=0)
 
 class SubTopic(Document):
     name = StringField(max_length=255,unique=True)

@@ -1,17 +1,33 @@
 {% extends "layout.html" %}
 
     {% block content %}
-        <a class="btn btn-primary" href="{{ url_for('.view_talk',talk_id=talk.id) }}">Back to Talk</a>
-        <h1>{{ topic.name }}</h1>
-        <ul class="list-unstyled">
-        {% for s in topic.sub_topics %}
-            <li>
-                {{ s.name }}  <a href="{{ url_for('.view_sub',sub_id=s.id) }}">view</a>
-            </li>
-        {% endfor %}
-        <li>
-            <a href="/talks/subtopic/add/{{ topic.id }}/">add subtopic</a>
-        </li>
-        </ul>
+        <div class=row>
+            <div class="col-md-offset-2 col-md-2">
+                <a class="btn btn-primary" href="{{ url_for('.view_talk',talk_id=talk.id) }}">Back to Talk</a>
+            </div>
+            <div class=col-md-6>
+                <h1>{{ topic.name }}</h1>
+            </div>
+        </div>
+        <div class=row>
+            <div class="col-md-6 col-md-offset-2">
+                <h2>{{ topic.name | plural }} SubTopics</h2>
+                {% for s in topic.sub_topics %}
+                    <div class=row>
+                        <div class=col-md-4>                        
+                            {{ s.name }}
+                        </div>
+                        <div class=col-md-4>
+                            <a class="btn btn-secondary-outline" href="{{ url_for('.view_sub',sub_id=s.id) }}">view</a>
+                        </div>
+                    </div>                        
+                {% endfor %}
+                <div class=row>
+                    <div class="col-md-4 col-md-offset-2">
+                        <a class="btn btn-success-outline" href="/talks/subtopic/add/{{ topic.id }}/">add subtopic</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     {% endblock %}
 

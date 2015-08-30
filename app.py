@@ -66,9 +66,13 @@ app = MyFlask(__name__)
 api = flask.Blueprint(__name__+'api','api',url_prefix='/api/v1')
 
 
-@app.template_filter
+@app.template_filter()
 def markdown(s):
     return md(s)
+
+@app.template_filter()
+def plural(s):
+    return pluralize(s)
 
 @app.before_request
 def connect_redis():
@@ -258,7 +262,9 @@ class FrontContentView(views.MethodView):
         prev_item = (len(other_items) > 1 and idx != 0) and other_items[idx-1].id
         next_item = (len(other_items) >= 2 and idx != (len(other_items)-1)) and other_items[idx+1].id
         is_code = content.type_code == 'code'
-        return flask.render_template('content.html',content=content.content.strip(),is_code=is_code,prev_id=prev_item,next_id=next_item,talk=talk)
+        is_html = content.type_code == 'html'
+        is_markdown = content.type_code == 'markdown'
+        return flask.render_template('content.html',content=content.content.strip(),is_code=is_code,prev_id=prev_item,next_id=next_item,talk=talk,is_html=is_html,is_markdown=is_markdown)
 
 class FrontTopicView(views.MethodView):
     def get(self,topic_id):
