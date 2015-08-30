@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+    {% block content %}
+        <a class="btn btn-primary" href="{{ url_for('.view_talk',talk_id=talk.id) }}">Back to Talk</a>
+        <h1>{{ topic.name }}</h1>
+        <ul class="list-unstyled">
+        {% for s in topic.sub_topics %}
+            <li>
+                {{ s.name }}  <a href="{{ url_for('.view_sub',sub_id=s.id) }}">view</a>
+            </li>
+        {% endfor %}
+        <li>
+            <a href="/talks/subtopic/add/{{ topic.id }}/">add subtopic</a>
+        </li>
+        </ul>
+    {% endblock %}
+

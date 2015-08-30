@@ -170,7 +170,7 @@ def add_get_id():
             'get_id':lambda itm: hasattr(itm,'_id') and getattr(getattr(itm,'_id'),'$id')
            }
 
-front = flask.Blueprint(__name__+'front','front',url_prefix='/talks',template_folder=os.path.dirname(__file__))
+front = flask.Blueprint(__name__+'front','front',url_prefix='/talks',template_folder='templates')
 
 class FrontIndexView(views.MethodView):
 

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+    {% macro render_field(field) %}
+        <div class="form-group">
+            {% if not field.type == 'HiddenField' %}
+                <label class=control-label>{{ field.label.text }}</label>
+            {% endif %}
+            {{ field(class_='form-control',ng_model='data.name') }}
+        </div>
+    {% endmacro %}
+    {% block content %}
+        <form class=form method="post">
+            <fieldset>
+                <legend>Add Sub Topic</legend>
+                {{ render_field(form.name) }}
+                {{ render_field(form.topic) }}
+                <a class="btn btn-primary-outline" ng-click="addTopic()">Add SubTopic</a>
+            </fieldset>
+        </form>
+    {% endblock %}
