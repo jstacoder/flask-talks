@@ -260,6 +260,19 @@ class FrontSubView(views.MethodView):
         return flask.render_template('sub.html',sub=sub,topic=topic)
 
 
+class DeleteView(views.MethodView):
+    _model = None
+
+    def get(self,obj_id):
+        obj = get_by_id(self._model,obj_id)
+        obj.delete()
+        return flask.redirect(flask.url_for('.index'))        
+
+class DeleteTalkView(DeleteView):
+    _model = Talk
+
+
+
 front.add_url_rule('/','index',view_func=FrontIndexView.as_view('index'))
 front.add_url_rule('/view/<talk_id>/','view_talk',view_func=FrontTalkView.as_view('view_talk'))
 front.add_url_rule('/add/','add_talk',view_func=FrontAddTalkView.as_view('add_talk'))
@@ -269,6 +282,7 @@ front.add_url_rule('/view/sub/<sub_id>/','view_sub',view_func=FrontSubView.as_vi
 front.add_url_rule('/content/add/<sub_id>/','add_content',view_func=FrontAddContentView.as_view('add_content'))
 front.add_url_rule('/topic/add/<talk_id>/','add_topic',view_func=FrontAddTopicView.as_view('add_topic'))
 front.add_url_rule('/subtopic/add/<topic_id>/','add_subtopic',view_func=FrontAddSubTopicView.as_view('add_subtopic'))
+front.add_url_rule('/delete/<obj_id>','delete_talk',view_func=DeleteTalkView.as_view('delete_talk'))
 
 
 
