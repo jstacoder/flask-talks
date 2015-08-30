@@ -13,8 +13,8 @@
                            style="display:inline-block;"
                         >Add Topic</a>
                     </div>
-                    <div class=col-md-12>
                         {% for topic in talk['topics'] %}            
+                    <div class=col-md-12>
                         <div class=title style="display:inline-block">
                             <h2 class="lead" style="display:inline-block">{{ topic['name'] }}</h2> 
                             <a 
@@ -57,10 +57,10 @@
                                     </div>
                                 </div>
                             </div>
-                        {% endfor %}
+                        </div>
                     {% endfor %}
-                    <hr />
-                </div>
+                {% endfor %}
+                <hr />
             </div>
         </div>
     {% endblock %}
