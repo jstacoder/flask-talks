@@ -13,11 +13,11 @@
                     {% endif %}
                     <div class=card-footer>
                         {% if prev_id %}
-                            <a class="btn btn-sm btn-success-outline" href="{{ url_for('.view_content',content_id=prev_id) }}"> &#9668; last</a>
+                            <a class="pull-left btn btn-sm btn-success-outline" href="{{ url_for('.view_content',content_id=prev_id) }}"> &#9668; last</a>
                         {% endif %}
                         <a class="btn btn-sm btn-success-outline" href="{{ url_for('.view_talk',talk_id=talk.id) }}">back to talk</a>
                         {% if next_id %}
-                            <a class="btn btn-sm btn-success-outline" href="{{ url_for('.view_content',content_id=next_id) }}"> &#9658; next</a>
+                            <a class="pull-right btn btn-sm btn-success-outline" href="{{ url_for('.view_content',content_id=next_id) }}"> &#9658; next</a>
                         {% endif %}
                     </div>
                 </div>
