@@ -9,11 +9,6 @@ from mongoengine import (
         ListField, ReferenceField, pre_init, post_init,DynamicField,
         ReferenceField
 )
-from content_types import (
-            TextContent,HTMLContent,CodeContent,
-            ImageContent,VideoContent,URLContent,
-            PDFContent
-)
 
 class ContentItem(Document):
     content = DynamicField()
@@ -42,7 +37,6 @@ class SubTopic(Document):
                     rtn.append(c)
         return rtn if not reverse else reversed(rtn)
 
-
 class Topic(Document):
     name = StringField(max_length=255,unique=True)
     sub_topics = ListField(ReferenceField(SubTopic))
@@ -53,7 +47,6 @@ class Topic(Document):
         rtn['sub_topics'] = [json.loads(x.to_json()) for x in self.sub_topics]
         return json.dumps(rtn)
 
-    
 class Talk(Document):
     name = StringField(max_length=255,unique=True)
     topics = ListField(ReferenceField(Topic))
@@ -64,38 +57,22 @@ class Talk(Document):
         rtn['topics'] = [json.loads(x.to_json()) for x in self.topics if type(x) == Topic]
         return json.dumps(rtn)
 
-
-#pre_init.connect(_pre)
-
 def main():
-    #from t3 import MONGOLAB_URI
-    #conn = connect(MONGOLAB_URI)
-    #data = _get_conn_from_uri(MONGOLAB_URI)
-    #conn = connect(data)
-    #conn = connect(MONGOLAB_URI)
-    #dbname,conn = get_connection_and_dbname()
-    #db = conn[dbname]
-    #conn.drop_database(db)
     db = get_default_db()
     if len(Talk.objects.all()) == 0:
-        #_pre(document=ContentType)
         itm1 = ContentItem()
-        itm1.content = 'xxxxx'
+        itm1.content = 'def a_py_func():\n\tprint "hello world"'
         itm1.order = 1
         itm1.save()
         itm2 = ContentItem()
-        itm2.content = 'yyyyy'
+        itm2.content = 'def a_py_func():\n\tprint "hello world"'
         itm2.order = 0
         itm2.save()
         sub = SubTopic(name='programming',content_items=[itm1,itm2]).save()
         topic = Topic(name='Python',sub_topics=[sub]).save()
         talk = Talk(name='first_talk',topics=[topic]).save()        
-    print Talk.objects.all()
     t = Talk.objects.all()[0]
     print '{}:\n\n\t'.format(t.topics[0].sub_topics[0].name)+'\n\t'.join(map(str,map(lambda x: x.content,t.topics[0].sub_topics[0].get_content())))
-    
-
-
 
 if __name__ == "__main__":
     main()
