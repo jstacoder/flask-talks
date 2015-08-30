@@ -1,0 +1,32 @@
+{
+    "name": "Flask Talks",
+    "description": "A tool for giving presentations",
+    "keywords": [
+        "flask",
+        "python",
+        "angular",
+        "talks"
+    ],
+    "website": "https://flask-talks.herokuapp.com/talks",
+    "repository": "https://github.com/jstacoder/flask-talks",
+    "success_url": "/talks",
+    "scripts": {
+        "postdeploy": "/app/dbsetup.sh"
+    },
+    "env": {
+        "SECRET_KEY": {
+            "description": "A secret key for verifying the integrity of signed cookies.",
+            "generator":"secret"
+        }
+    },
+    "addons": [
+        "rediscloud:30",
+        "mongolab:sandbox"
+    ],
+    "buildpacks": [
+        {
+            "url":"https://github.com/ddollar/heroku-buildpack-python"
+        }
+    ]
+}
+
