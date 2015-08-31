@@ -3,18 +3,20 @@
     {% block content %}
         <div class=row>
             <div class="col-md-10 col-md-offset-1">
-                <div class=card>
-                    {% if is_code %}
-                        {% highlight code_language|default('python') -%}
-                            {{ content|safe }}
-                        {%- endhighlight %}
-                    {% elif is_markdown %}
-                        {{ content | markdown | safe }}
-                    {% elif is_html %}
-                        {{ content | safe }}
-                    {% else %}
-                        {{ content }}
-                    {% endif %}
+                <div class="card">
+                    <div class="card-block">
+                        {% if is_code %}
+                            {% highlight code_language|default('python') -%}
+                                    {{ content|safe }}
+                            {%- endhighlight %}
+                        {% elif is_markdown %}
+                            {{ content | markdown | safe }}
+                        {% elif is_html %}
+                            {{ content | safe }}
+                        {% else %}
+                            {{ content }}
+                        {% endif %}
+                    </div>
                     <div class=card-footer>
                         <div class=row>
                             <div class=col-md-5>
