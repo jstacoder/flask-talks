@@ -80,13 +80,10 @@
                                                         <li><i class="fa-li fa fa-gg-circle"></i>
                                                             <div class=row>
                                                                 <div class="col-md-7">
-                                                                    {{ content['bullet'] }}
-                                                                </div>
-                                                                <div class="col-md-pull-4 col-md-1">
                                                                     <a
-                                                                       href="{{ url_for('.view_content',content_id=content['_id']['$oid']) }}"
-                                                                       class="btn btn-xs btn-primary-outline"
-                                                                    >view</a>
+                                                                     href="{{ url_for('.view_content',content_id=content['_id']['$oid']) }}"
+                                                                       class="bullet"
+                                                                       >{{ content['bullet'] }}</a>
                                                                 </div>
                                                             </div>
                                                         </li>
