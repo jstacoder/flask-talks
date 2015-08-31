@@ -240,7 +240,7 @@ class FrontAddSubTopicView(views.MethodView):
 class FrontAddContentView(views.MethodView):
 
     def get(self,sub_id):
-        form = AddContentForm(sub=sub_id)
+        form = AddContentForm(sub=sub_id,order=0)
         return flask.render_template('add_content.html',form=form)
 
     def post(self,sub_id):
