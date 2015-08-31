@@ -79,10 +79,10 @@
                                                     {#{% if content['order'] == n %}#}
                                                         <li><i class="fa-li fa fa-gg-circle"></i>
                                                             <div class=row>
-                                                                <div class=col-md-11>
+                                                                <div class="col-md-11">
                                                                     {{ content['bullet'] }}
                                                                 </div>
-                                                                <div class="col-md-push-1 col-md-1">
+                                                                <div class="col-md-pull-2 col-md-1">
                                                                     <a
                                                                        href="{{ url_for('.view_content',content_id=content['_id']['$oid']) }}"
                                                                        class="btn btn-xs btn-primary-outline"
