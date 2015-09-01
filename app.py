@@ -12,6 +12,7 @@ from markdown2 import markdown as md
 import jinja2_highlight
 from click_counter import get_counter,cache_count,check_cache,set_session,check_session
 
+g.edit_mode = 'edit_mod' in g  and g.edit_mode or True
 
 add_click = get_counter('flask-talks.herokuapp.com')
 
@@ -66,6 +67,9 @@ def add_content_to_subtopic(sub_topic,content,order=None):
 app = MyFlask(__name__)
 api = flask.Blueprint(__name__+'api','api',url_prefix='/api/v1')
 
+@app.template_global()
+def is_edit_mode():
+    return g.edit_mode
 
 @app.template_filter()
 def markdown(s):
