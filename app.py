@@ -172,6 +172,7 @@ class ChangeEditMode(views.MethodView):
             on=edit_on,
             off=edit_off
         )[flask.request.args['edit_mode']]()
+        app.jinja_env.globals['is_edit_mode'] = is_edit()
         return flask.redirect(flask.url_for('front.view_talk',talk_id=talk_id))
 
 api.add_url_rule('/talks/','index',view_func=AddTalkView.as_view('index'))
