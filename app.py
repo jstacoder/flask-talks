@@ -162,6 +162,12 @@ class ShowTopicView(ShowView):
 class ShowSubTopicView(ShowView):
     _model = SubTopic
 
+class ChangeEditMode(views.MethodView):
+
+    def get(self):
+        g.edit_mode = not (not g.edit_mode)
+        return flask.redirect(flask.url_for('front.index'))
+
 api.add_url_rule('/talks/','index',view_func=AddTalkView.as_view('index'))
 api.add_url_rule('/talks/<item_id>','show_talks',view_func=ShowTalkView.as_view('show_talks'))
 api.add_url_rule('/topics/','topics',view_func=ShowTopicView.as_view('topics'))
@@ -176,6 +182,8 @@ api.add_url_rule('/talks/add/','add_talk',view_func=AddTalksView.as_view('add_ta
 api.add_url_rule('/topics/add/','add_topic',view_func=AddTopicView.as_view('add_topic'))
 api.add_url_rule('/subtopics/add/','add_sub',view_func=AddSubTopicView.as_view('add_sub'))
 api.add_url_rule('/content/add/','add_content',view_func=AddContentView.as_view('add_content'))
+api.add_url_rule('/edit_mode','edit_mode',view_func=ChangeEditMode.as_view('edit_mode'))
+
 
 
 app.register_blueprint(api)
@@ -186,7 +194,7 @@ def add_get_id():
             'get_id':lambda itm: hasattr(itm,'_id') and getattr(getattr(itm,'_id'),'$id')
            }
 
-front = flask.Blueprint(__name__+'front','front',url_prefix='/talks',template_folder='templates')
+front = flask.Blueprint('front','front',url_prefix='/talks',template_folder='templates')
 
 class FrontIndexView(views.MethodView):
 
