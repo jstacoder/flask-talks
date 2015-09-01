@@ -13,6 +13,8 @@
                             {{ content | markdown | safe }}
                         {% elif is_html %}
                             {{ content | safe }}
+                        {% elif is_image %}
+                            <img src="{{ content|trim }}" />
                         {% else %}
                             {{ content }}
                         {% endif %}

@@ -263,8 +263,19 @@ class FrontContentView(views.MethodView):
         next_item = (len(other_items) >= 2 and idx != (len(other_items)-1)) and other_items[idx+1].id
         is_code = content.type_code == 'code'
         is_html = content.type_code == 'html'
+        is_image = content.type_code == 'image'
         is_markdown = content.type_code == 'markdown'
-        return flask.render_template('content.html',content=content.content.strip(),is_code=is_code,prev_id=prev_item,next_id=next_item,talk=talk,is_html=is_html,is_markdown=is_markdown)
+        return flask.render_template(
+                                'content.html',
+                                content = content.content.strip(),
+                                is_code = is_code,
+                                prev_id = prev_item,
+                                next_id = next_item,
+                                talk = talk,
+                                is_html = is_html,
+                                is_markdown = is_markdown,
+                                is_image = is_image,
+        )
 
 class FrontTopicView(views.MethodView):
     def get(self,topic_id):
