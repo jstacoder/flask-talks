@@ -12,7 +12,7 @@
     <div class=row>
         <div class="col-md-7 col-md-offset-2" ng-controller="AddContentCtrl as ctrl">
             <div class="card card-block">
-                <form class=form action="" method="post" name="addContentForm">
+                <form class=form {% if is_edit %}action="" {% endif %}method="post" name="addContentForm">
                     <fieldset>
                         <legend>Add Content</legend>
                         <div class=row>
