@@ -70,10 +70,7 @@ api = flask.Blueprint(__name__+'api','api',url_prefix='/api/v1')
 @app.before_request
 def add_edit_mode():
     g.edit_mode = get_edit_mode()
-
-@app.template_global()
-def is_edit_mode():
-    return g.edit_mode
+    app.jinja_env.globals['is_edit_mode'] = g.edit_mode
 
 @app.template_filter()
 def markdown(s):
