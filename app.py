@@ -12,7 +12,7 @@ from markdown2 import markdown as md
 import jinja2_highlight
 from click_counter import get_counter,cache_count,check_cache,set_session,check_session
 
-get_edit_mode = lambda: 'edit_mode' in g  and g.edit_mode or True
+get_edit_mode = lambda: hasattr(g,'edit_mode') and g.edit_mode or True
 
 add_click = get_counter('flask-talks.herokuapp.com')
 
