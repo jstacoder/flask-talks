@@ -25,7 +25,15 @@ class AddTopicForm(Form):
 class AddContentForm(Form):
     order = fields.IntegerField('order',validators=[validators.InputRequired()])
     content = fields.TextAreaField('content')
-    typecode = fields.SelectField('Type Code',choices=(('html','html'),('code','code'),('text','text'),('markdown','markdown'),('image'.'image')),validators=[validators.InputRequired()])
+    typecode = fields.SelectField(
+                            'Type Code',
+                            choices = (
+                                ('html','html'),
+                                ('code','code'),
+                                ('text','text'),
+                                ('markdown','markdown'),
+                                ('image','image')
+                        ),validators=[validators.InputRequired()])
     bullet = fields.StringField('Bullet')
     sub = fields.HiddenField('sub')
 
