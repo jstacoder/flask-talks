@@ -23,9 +23,9 @@
                                 {% if talk %}
                                 <li class="nav-item">
                                     {% if is_edit_mode %}
-                                        <a class="nav-link" href="{{ url_for('appapi.edit_mode',talk_id=talk_id,edit_mode='off') }}"><span class="fa fa-book"></span> Edit Off</a>
+                                        <a class="nav-link" href="{{ url_for('api.edit_mode',talk_id=talk_id,edit_mode='off') }}"><span class="fa fa-book"></span> Edit Off</a>
                                     {% else %}
-                                        <a class="nav-link" href="{{ url_for('appapi.edit_mode',talk_id=talk_id,edit_mode='on') }}"><span class="fa fa-book"></span> Edit On</a>
+                                        <a class="nav-link" href="{{ url_for('api.edit_mode',talk_id=talk_id,edit_mode='on') }}"><span class="fa fa-book"></span> Edit On</a>
                                     {% endif %}
 
                                 </li>

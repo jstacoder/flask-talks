@@ -71,7 +71,7 @@ def add_content_to_subtopic(sub_topic,content,order=None):
 
 
 app = MyFlask(__name__)
-api = flask.Blueprint(__name__+'api','api',url_prefix='/api/v1')
+api = flask.Blueprint('api','api',url_prefix='/api/v1')
 
 
 @app.template_filter()
