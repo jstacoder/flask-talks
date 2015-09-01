@@ -15,7 +15,7 @@
     </div>
     <div class=row>
         {% for c in sub['content_items'] %}
-            <div class="col-md-12">
+            <div class="col-md-6 col-md-offset-4 col-md-push-2">
                 <div class=row>
                     <div class="col-md-2 col-md-offset-4">
                         <p>{{ loop.index }} <i class="fa fa-arrow-right"></i> <a style="color:black;" href="{{ url_for('.view_content',content_id=c.id) }}">{{ c.bullet }}</a></p>
