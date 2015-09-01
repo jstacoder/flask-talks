@@ -169,7 +169,7 @@ class ChangeEditMode(views.MethodView):
 
     def get(self,talk_id):
         change_mode()
-        return flask.redirect(flask.url_for('front.show_talk',item_id=talk_id))
+        return flask.redirect(flask.url_for('front.view_talk',talk_id=talk_id))
 
 api.add_url_rule('/talks/','index',view_func=AddTalkView.as_view('index'))
 api.add_url_rule('/talks/<item_id>','show_talk',view_func=ShowTalkView.as_view('show_talk'))
