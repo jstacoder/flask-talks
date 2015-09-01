@@ -20,9 +20,16 @@
                                 <li class="nav-item">
                                     <a class="nav-link" href="/talks/add"><span class="fa fa-money"></span> Add Talk</a>
                                 </li>
+                                {% if talk %}
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/talks"><span class="fa fa-book"></span> About</a>
+                                    {% if is_edit_mode %}
+                                        <a class="nav-link" href="{{ url_for('appapi.edit_mode',talk_id=talk.id,edit_mode='off') }}"><span class="fa fa-book"></span> Edit Off</a>
+                                    {% else %}
+                                        <a class="nav-link" href="{{ url_for('appapi.edit_mode',talk_id=talk.id,edit_mode='on') }}"><span class="fa fa-book"></span> Edit On</a>
+                                    {% endif %}
+
                                 </li>
+                                {% endif %}
                             </ul>
                             <!--
                             <form class="form-inline navbar-form pull-right">
