@@ -168,7 +168,10 @@ class ShowSubTopicView(ShowView):
 class ChangeEditMode(views.MethodView):
 
     def get(self,talk_id):
-        change_mode()
+        dict(
+            on=edit_on,
+            off=edit_off
+        )[flask.request.args['edit_mode']]()
         return flask.redirect(flask.url_for('front.view_talk',talk_id=talk_id))
 
 api.add_url_rule('/talks/','index',view_func=AddTalkView.as_view('index'))
