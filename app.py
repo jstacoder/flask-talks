@@ -18,7 +18,7 @@ change_mode = lambda: setattr(g,'edit_mode',(not getattr(g,'edit_mode')))
 
 edit_on = lambda: setattr(g,'edit_mode',True)
 edit_off = lambda: setattr(g,'edit_mode',False)
-is_edit = ;lambda: getattr(g,'edit_mode',True)
+is_edit = lambda: getattr(g,'edit_mode',True)
 
 add_click = get_counter('flask-talks.herokuapp.com')
 
