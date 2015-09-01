@@ -295,7 +295,7 @@ class EditView(views.MethodView):
     def get(self,obj_id):
         obj = get_by_id(self._model,obj_id)
         form = self._form(obj=obj)
-        return render_template(self._edit_template,form=form,obj=obj)
+        return flask.render_template(self._edit_template,form=form,obj=obj,is_edit=True)
 
 
     def post(self,obj_id):
@@ -322,7 +322,7 @@ class EditContentView(EditView):
     _model = ContentItem
     _form = AddContentForm
     _endpoint = '.view_sub'
-    _edit_template = 'edit_content.html'
+    _edit_template = 'add_content.html'
     _query_arg = 'sub_id'
 
 
