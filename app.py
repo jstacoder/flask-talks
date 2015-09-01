@@ -16,6 +16,10 @@ get_edit_mode = lambda: hasattr(g,'edit_mode') and getattr(g,'edit_mode') or Tru
 
 change_mode = lambda: setattr(g,'edit_mode',(not getattr(g,'edit_mode')))
 
+edit_on = setattr(g,'edit_mode',True)
+edit_off = setattr(g,'edit_mode',False)
+is_edit = getattr(g,'edit_mode',True)
+
 add_click = get_counter('flask-talks.herokuapp.com')
 
 def get_by_id(model,_id):
@@ -69,10 +73,6 @@ def add_content_to_subtopic(sub_topic,content,order=None):
 app = MyFlask(__name__)
 api = flask.Blueprint(__name__+'api','api',url_prefix='/api/v1')
 
-@app.before_request
-def add_edit_mode():
-    g.edit_mode = get_edit_mode()
-    app.jinja_env.globals['is_edit_mode'] = g.edit_mode
 
 @app.template_filter()
 def markdown(s):
@@ -198,6 +198,11 @@ def add_get_id():
            }
 
 front = flask.Blueprint('front','front',url_prefix='/talks',template_folder='templates')
+
+@front.before_app_request
+def add_edit_mode():
+    g.edit_mode = get_edit_mode()
+    app.jinja_env.globals['is_edit_mode'] = is_edit()
 
 class FrontIndexView(views.MethodView):
 
