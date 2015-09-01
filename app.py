@@ -12,7 +12,9 @@ from markdown2 import markdown as md
 import jinja2_highlight
 from click_counter import get_counter,cache_count,check_cache,set_session,check_session
 
-get_edit_mode = lambda: hasattr(g,'edit_mode') and g.edit_mode or True
+get_edit_mode = lambda: hasattr(g,'edit_mode') and getattr(g,'edit_mode') or True
+
+change_mode = lambda: setattr(g,'edit_mode',(not getattr(g,'edit_mode')))
 
 add_click = get_counter('flask-talks.herokuapp.com')
 
@@ -165,12 +167,12 @@ class ShowSubTopicView(ShowView):
 
 class ChangeEditMode(views.MethodView):
 
-    def get(self):
-        g.edit_mode = not (not g.edit_mode)
-        return flask.redirect(flask.url_for('front.index'))
+    def get(self,talk_id):
+        change_mode()
+        return flask.redirect(flask.url_for('front.show_talk',item_id=talk_id))
 
 api.add_url_rule('/talks/','index',view_func=AddTalkView.as_view('index'))
-api.add_url_rule('/talks/<item_id>','show_talks',view_func=ShowTalkView.as_view('show_talks'))
+api.add_url_rule('/talks/<item_id>','show_talk',view_func=ShowTalkView.as_view('show_talk'))
 api.add_url_rule('/topics/','topics',view_func=ShowTopicView.as_view('topics'))
 api.add_url_rule('/topics/<item_id>','show_topics',view_func=ShowTopicView.as_view('show_topics'))
 api.add_url_rule('/subtopics/','subtopics',view_func=ShowSubTopicView.as_view('subtopics'))
@@ -183,7 +185,7 @@ api.add_url_rule('/talks/add/','add_talk',view_func=AddTalksView.as_view('add_ta
 api.add_url_rule('/topics/add/','add_topic',view_func=AddTopicView.as_view('add_topic'))
 api.add_url_rule('/subtopics/add/','add_sub',view_func=AddSubTopicView.as_view('add_sub'))
 api.add_url_rule('/content/add/','add_content',view_func=AddContentView.as_view('add_content'))
-api.add_url_rule('/edit_mode','edit_mode',view_func=ChangeEditMode.as_view('edit_mode'))
+api.add_url_rule('/edit_mode/<talk_id>/','edit_mode',view_func=ChangeEditMode.as_view('edit_mode'))
 
 
 
