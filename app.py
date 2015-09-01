@@ -6,6 +6,7 @@ from app_forms import AddTalkForm,AddTopicForm,AddContentForm,AddSubTopicForm
 from flask import views,g
 import json
 import flask
+import bson
 from csrf import crossdomain
 from markdown2 import markdown as md
 import jinja2_highlight
@@ -282,7 +283,7 @@ class FrontSubView(views.MethodView):
     def get(self,sub_id):        
         sub = get_by_id(SubTopic,sub_id)
         topic = filter(lambda x: sub in x.sub_topics,Topic.objects.all())[0]
-        sub = dict(content_items=sub.content_items,name=sub.name,id=sub_id)
+        sub = dict(content_items=filter(lambda x: type(x) != bson.dbref.DBRef,sub.content_items),name=sub.name,id=sub_id)
         return flask.render_template('sub.html',sub=sub,topic=topic)
 
 
