@@ -76,12 +76,6 @@ def plural(s):
 
 @app.before_request
 def connect_redis():
-    #host = 'localhost'
-    #if 'REDISCLOUD_URL' in os.environ:
-    #    g._cache = from_url(os.environ.get('REDISCLOUD_URL'))
-    #else:
-    #    g._cache = Redis()
-    #print '\n'.join(map(str,flask.request.environ.keys()))
     if not check_cache():
         cache_count()
         add_click()
@@ -291,7 +285,55 @@ class FrontSubView(views.MethodView):
         return flask.render_template('sub.html',sub=sub,topic=topic)
 
 
+class EditView(views.MethodView):
+    _model = None
+    _form = None
+    _edit_template = None
+    _endpoint = None
+    _query_arg = {}
+
+    def get(self,obj_id):
+        obj = get_by_id(self._model,obj_id)
+        form = self._form(obj=obj)
+        return render_template(self._edit_template,form=form,obj=obj)
+
+
+    def post(self,obj_id):
+        obj = get_by_id(self._model,obj_id)
+        for attr in dir(obj):
+            if not attr.startswith('_'):
+                if attr in flask.request.form:
+                    val = flask.request.form[attr]
+                    if val:
+                        setattr(obj,attr,val)
+        obj.save()
+        if self._query_arg:
+            if type(self._query_arg) == str:
+                self._query_arg = { 
+                        self._query_arg:flask.request.args[self._query_arg]
+                }
+            else:
+                self._query_arg = {
+                    x:flask.request.args[x] for x in self._query_arg
+                }
+        return flask.redirect(flask.url_for(self._endpoint,**self._query_arg))        
+
+class EditContentView(EditView):
+    _model = ContentItem
+    _form = AddContentForm
+    _endpoint = '.view_sub'
+    _edit_template = 'edit_content.html'
+    _query_arg = 'sub_id'
+
+
 class DeleteView(views.MethodView):
+    '''
+        generic delete view
+
+        _model => Model to delete
+        _endpoint => endpoint to redirect after deleting 
+        _query_arg => args needed when redirecting
+    '''
     _model = None
     _endpoint = '.index'
     _query_arg = {}
@@ -300,9 +342,14 @@ class DeleteView(views.MethodView):
         obj = get_by_id(self._model,obj_id)
         obj.delete()
         if self._query_arg:
-            self._query_arg = {
-                    self._query_arg:flask.request.args[self._query_arg]
-            }
+            if type(self._query_arg) == str:
+                self._query_arg = { 
+                        self._query_arg:flask.request.args[self._query_arg]
+                }
+            else:
+                self._query_arg = {
+                    x:flask.request.args[x] for x in self._query_arg
+                }
         return flask.redirect(flask.url_for(self._endpoint,**self._query_arg))        
 
 class DeleteTalkView(DeleteView):
@@ -313,6 +360,10 @@ class DeleteTopicView(DeleteView):
     _endpoint = '.view_talk'
     _query_arg = 'talk_id'
 
+class DeleteContentView(DeleteView):
+    _model = ContentItem
+    _endpoint = '.view_sub'
+    _query_arg = 'sub_id'
 
 
 front.add_url_rule('/','index',view_func=FrontIndexView.as_view('index'))
@@ -324,8 +375,10 @@ front.add_url_rule('/view/sub/<sub_id>/','view_sub',view_func=FrontSubView.as_vi
 front.add_url_rule('/content/add/<sub_id>/','add_content',view_func=FrontAddContentView.as_view('add_content'))
 front.add_url_rule('/topic/add/<talk_id>/','add_topic',view_func=FrontAddTopicView.as_view('add_topic'))
 front.add_url_rule('/subtopic/add/<topic_id>/','add_subtopic',view_func=FrontAddSubTopicView.as_view('add_subtopic'))
-front.add_url_rule('/delete/<obj_id>','delete_talk',view_func=DeleteTalkView.as_view('delete_talk'))
-front.add_url_rule('/delete/topic/<obj_id>','delete_topic',view_func=DeleteTopicView.as_view('delete_topic'))
+front.add_url_rule('/delete/<obj_id>/','delete_talk',view_func=DeleteTalkView.as_view('delete_talk'))
+front.add_url_rule('/delete/topic/<obj_id>/','delete_topic',view_func=DeleteTopicView.as_view('delete_topic'))
+front.add_url_rule('/delete/content/<obj_id>/','delete_content',view_func=DeleteContentView.as_view('delete_content'))
+front.add_url_rule('/edit/content/<obj_id>/','edit_content',view_func=EditContentView.as_view('edit_content'))
 
 
 
