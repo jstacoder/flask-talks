@@ -1,6 +1,7 @@
 # coding: utf-8
 import os
 import json
+import bson
 from dbconn import get_connection,get_connection_and_dbname,get_default_db
 from mongoengine import (
         Document, EmbeddedDocument, EmbeddedDocumentField , 
@@ -9,6 +10,16 @@ from mongoengine import (
         ListField, ReferenceField, pre_init, post_init,DynamicField,
         ReferenceField
 )
+
+def get_parent(obj,attr_name,parent_class,is_list=True):
+    for o in parent_class.objects.all():
+        if not is_list:
+            if getattr(o,attr_name) == obj:
+                return o
+        else:
+            if obj in getattr(o,attr_name):
+                return o
+    return None
 
 class ContentItem(Document):
     content = DynamicField()
@@ -19,6 +30,13 @@ class ContentItem(Document):
     bullet = StringField(max_length=50,default='A note about the topic')
     order = IntField(default=0)
 
+    def delete(self):
+        sub = get_parent(self,'content_items',SubTopic)
+        sub.content_items.pop(sub.content_items.index(self))
+        sub.save()
+        return super(ContentItem,self).delete()
+        
+
 class SubTopic(Document):
     name = StringField(max_length=255,unique=True)
     content_items = ListField(ReferenceField(ContentItem))
@@ -26,7 +44,7 @@ class SubTopic(Document):
     def to_json(self):
         rtn = super(SubTopic,self).to_json()
         rtn = json.loads(rtn)
-        rtn['content_items'] = [json.loads(x.to_json()) for x in self.content_items]
+        rtn['content_items'] = [json.loads(x.to_json()) for x in self.content_items if not type(x) == bson.dbref.DBRef]
         return json.dumps(rtn)
 
     def get_content(self,reverse=False):
@@ -44,7 +62,7 @@ class Topic(Document):
     def to_json(self):
         rtn = super(Topic,self).to_json()
         rtn = json.loads(rtn)
-        rtn['sub_topics'] = [json.loads(x.to_json()) for x in self.sub_topics]
+        rtn['sub_topics'] = [json.loads(x.to_json()) for x in self.sub_topics if not type(x) == bson.dbref.DBRef]
         return json.dumps(rtn)
 
 class Talk(Document):
