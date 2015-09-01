@@ -240,6 +240,7 @@ class FrontAddContentView(views.MethodView):
     def post(self,sub_id):
         sub = get_by_id(SubTopic,sub_id)
         form = flask.request.json    
+        r = flask.request
         content = ContentItem(content=form['content'],bullet=form['bullet'],type_code=form['type_code'],order=form['order']).save()
         sub.content_items.append(content)
         sub.save()
