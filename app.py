@@ -16,8 +16,8 @@ get_edit_mode = lambda: hasattr(g,'edit_mode') and getattr(g,'edit_mode') or Tru
 
 change_mode = lambda: setattr(g,'edit_mode',(not getattr(g,'edit_mode')))
 
-edit_on = lambda: setattr(EditMode.get(),'edit_mode',True) and EditMode.get().save()
-edit_off = lambda: setattr(EditMode.get(),'edit_mode',False) and EditMode.get().save()
+edit_on = lambda: setattr(EditMode.get(),'is_active',True) and EditMode.get().save()
+edit_off = lambda: setattr(EditMode.get(),'is_active',False) and EditMode.get().save()
 is_edit = lambda: EditMode.get().is_active
 
 add_click = get_counter('flask-talks.herokuapp.com')
@@ -73,10 +73,6 @@ def add_content_to_subtopic(sub_topic,content,order=None):
 app = MyFlask(__name__)
 api = flask.Blueprint('api','api',url_prefix='/api/v1')
 
-
-@app.template_filter()
-def is_edit_mode(s):
-    return is_edit()
 
 @app.template_filter()
 def markdown(s):
@@ -223,7 +219,7 @@ class FrontTalkView(views.MethodView):
         talk = Talk.objects(id=talk_id)
         talk = (len(talk)>0) and talk[0]
         rtn = format_talk(talk.to_json())
-        return flask.render_template('talks.html',talk=rtn,talk_id=talk_id)
+        return flask.render_template('talks.html',talk=rtn,talk_id=talk_id,is_edit_mode=is_edit())
 
 class FrontAddTalkView(views.MethodView):
 
