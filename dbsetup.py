@@ -21,6 +21,21 @@ def get_parent(obj,attr_name,parent_class,is_list=True):
                 return o
     return None
 
+class EditMode(Document):
+    _instance = None
+
+    is_active = BooleanField(default=True)
+
+    @classmethod
+    def get(cls):
+        if cls._instance is None:
+            cls._instance = len(cls.objects.all()) > 0 and cls.objects.all()[0] or None
+            if cls._instance is None:
+                cls._instance = cls().save()
+        return cls._instance
+
+
+
 class ContentItem(Document):
     content = DynamicField()
     '''

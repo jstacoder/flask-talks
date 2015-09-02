@@ -1,6 +1,6 @@
 import os
 from inflection import pluralize
-from dbsetup import Topic,SubTopic,Talk,ContentItem
+from dbsetup import Topic,SubTopic,Talk,ContentItem,EditMode
 from dbconn import get_connection_and_dbname, get_default_db
 from app_forms import AddTalkForm,AddTopicForm,AddContentForm,AddSubTopicForm
 from flask import views,g
@@ -16,9 +16,9 @@ get_edit_mode = lambda: hasattr(g,'edit_mode') and getattr(g,'edit_mode') or Tru
 
 change_mode = lambda: setattr(g,'edit_mode',(not getattr(g,'edit_mode')))
 
-edit_on = lambda: setattr(g,'edit_mode',True)
-edit_off = lambda: setattr(g,'edit_mode',False)
-is_edit = lambda: getattr(g,'edit_mode',True)
+edit_on = lambda: setattr(EditMode.get(),'edit_mode',True) and EditMode.get().save()
+edit_off = lambda: setattr(EditMode.get(),'edit_mode',False) and EditMode.get().save()
+is_edit = lambda: EditMode.get().is_active
 
 add_click = get_counter('flask-talks.herokuapp.com')
 
