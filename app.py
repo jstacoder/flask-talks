@@ -277,9 +277,8 @@ class FrontContentView(views.MethodView):
         topic = filter(lambda x: sub in x.sub_topics,Topic.objects.all())[0]
         talk = filter(lambda x: topic in x.topics,Talk.objects.all())[0]
         other_items = []
-        for topic in topics:
-            for sub in topic.sub_topics:
-                [other_items.append(x) for x in sub.content_items]
+        for sub in topic.sub_topics:
+            [other_items.append(x) for x in sub.content_items]
         idx = other_items.index(content)
         prev_item = (len(other_items) > 1 and idx != 0) and other_items[idx-1].id
         next_item = (len(other_items) >= 2 and idx != (len(other_items)-1)) and other_items[idx+1].id
