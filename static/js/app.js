@@ -95,7 +95,7 @@ app.controller('AddContentCtrl',['$window','$http','$scope',function($window,$ht
 
     self.submit = function(form){
         console.log($scope);
-        var type_code = form.typecode.$viewValue,
+        var type_code = form.type_code.$viewValue,
             content = form.content.$viewValue,
             order = form.order.$viewValue,
             bullet = form.bullet.$viewValue,
