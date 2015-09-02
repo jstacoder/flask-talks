@@ -24,7 +24,7 @@ def get_parent(obj,attr_name,parent_class,is_list=True):
 class EditMode(Document):
     _instance = None
 
-    is_active = BooleanField(default=True)
+    is_active = BooleanField(default=False)
 
     @classmethod
     def get(cls):
@@ -32,6 +32,9 @@ class EditMode(Document):
             cls._instance = len(cls.objects.all()) > 0 and cls.objects.all()[0] or None
             if cls._instance is None:
                 cls._instance = cls().save()
+        if not os.environ.get('ADD_EDIT_MODE'):
+            cls._instance.is_active = False
+            cls._instance.save()
         return cls._instance
 
 
