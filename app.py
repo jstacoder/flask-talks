@@ -75,6 +75,10 @@ api = flask.Blueprint('api','api',url_prefix='/api/v1')
 
 
 @app.template_filter()
+def is_edit_mode(s):
+    return is_edit()
+
+@app.template_filter()
 def markdown(s):
     return md(s)
 
@@ -172,7 +176,6 @@ class ChangeEditMode(views.MethodView):
             on=edit_on,
             off=edit_off
         )[flask.request.args['edit_mode']]()
-        app.jinja_env.globals['is_edit_mode'] = is_edit()
         return flask.redirect(flask.url_for('front.view_talk',talk_id=talk_id))
 
 api.add_url_rule('/talks/','index',view_func=AddTalkView.as_view('index'))
