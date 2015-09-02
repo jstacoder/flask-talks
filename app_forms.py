@@ -25,7 +25,7 @@ class AddTopicForm(Form):
 class AddContentForm(Form):
     order = fields.IntegerField('order',validators=[validators.InputRequired()])
     content = fields.TextAreaField('content')
-    typecode = fields.SelectField(
+    type_code = fields.SelectField(
                             'Type Code',
                             choices = (
                                 ('html','html'),
