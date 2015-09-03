@@ -8,14 +8,19 @@
                                 {{ t['name'] }}       
                             </div>
                             <div class="card-block row">
-                                <div class="col-md-6">
+                                {% if is_edit_mode %}
+                                    {% set size = 6 %}
+                                {% else %}
+                                    {% set size = 12 %}
+                                {% endif %}
+                                <div class="col-md-{{ size }}">
                                     <a class="btn btn-block group-btn btn-primary-outline" href="/talks/view/{{ t['id'] }}">view</a>
                                 </div>
-                                <div class="col-md-6">
                                     {% if is_edit_mode %}
+                                <div class="col-md-6">
                                     <a class="btn group-btn btn-block btn-danger-outline" href="/talks/delete/{{ t['id'] }}">Delete</a>
-                                    {% endif %}
                                 </div>
+                                    {% endif %}
                             </div>
                         </div>
                         {% endfor %}
