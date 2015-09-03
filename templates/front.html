@@ -12,7 +12,9 @@
                                     <a class="btn btn-block group-btn btn-primary-outline" href="/talks/view/{{ t['id'] }}">view</a>
                                 </div>
                                 <div class="col-md-6">
+                                    {% if is_edit_mode %}
                                     <a class="btn group-btn btn-block btn-danger-outline" href="/talks/delete/{{ t['id'] }}">Delete</a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
