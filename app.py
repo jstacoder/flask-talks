@@ -277,8 +277,10 @@ class FrontAddContentView(views.MethodView):
 class FrontContentView(views.MethodView):
     def get(self,content_id):
         content = get_by_id(ContentItem,content_id)
-        sub = filter(lambda x: content in x.content_items,SubTopic.objects.all())[0]
-        topic = filter(lambda x: sub in x.sub_topics,Topic.objects.all())[0]
+        subs = filter(lambda x: content in x.content_items,SubTopic.objects.all())
+        sub = subs and subs[0] or None
+        topics = sub and filter(lambda x: sub in x.sub_topics,Topic.objects.all()) or None
+        topic = topics and topics[0] or {'sub_topics':[]}
         talk = filter(lambda x: topic in x.topics,Talk.objects.all())[0]
         other_items = []
         for sub in topic.sub_topics:
