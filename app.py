@@ -194,6 +194,10 @@ api.add_url_rule('/edit_mode/<talk_id>/','edit_mode',view_func=ChangeEditMode.as
 
 app.register_blueprint(api)
 
+@app.route('/')
+def index():
+    return flask.redirect(flask.url_for('front.index'))
+
 @app.context_processor
 def add_get_id():
     return {
